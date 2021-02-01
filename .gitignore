@@ -2,7 +2,7 @@
 *.so
 *.o
 *.swp
+*.dll
+*.bundle
 example/opencv_demo
 example/apriltag_demo
-build/
-
