@@ -84,12 +84,8 @@ $(TARGET).dll: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(PTHREAD)
 	$(STRIP) $@
 
-$(TARGET).bundle: $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^ $(PTHREAD)
-
 lib$(TARGET).so: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(PTHREAD)
-	$(STRIP) $@
 
 lib$(TARGET).a : $(OBJS)
 	$(AR) -crv $@ $^

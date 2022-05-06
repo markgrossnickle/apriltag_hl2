@@ -21,7 +21,7 @@ $ cd build && make -f Makefile.windows
 ### macOS
 
 ```
-$ cd build && make -f Makefile.macos
+$ cd build && ./build.macos.sh
 ```
 
 ### Linux
