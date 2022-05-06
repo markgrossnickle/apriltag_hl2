@@ -30,6 +30,7 @@ $ cd build && ./build.macos.sh
 $ cd build && make -f Makefile.linux
 ```
 
+<<<<<<< HEAD
 ### iOS
 
 ```

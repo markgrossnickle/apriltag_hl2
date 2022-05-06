@@ -7,6 +7,7 @@
 #include <signal.h>
 
 #include "apriltag.h"
+#include "tag36h10.h"
 #include "tag36h11.h"
 #include "tag25h9.h"
 #include "tag16h5.h"
@@ -18,6 +19,7 @@
 
 
 #define SUPPORTED_TAG_FAMILIES(_)           \
+    _(tag36h10)                             \
     _(tag36h11)                             \
     _(tag25h9)                              \
     _(tag16h5)                              \
@@ -235,7 +237,7 @@ static PyObject* apriltag_detect(apriltag_py_t* self,
         PyErr_Format(PyExc_RuntimeError, "Error creating output tuple of size %d", N);
         goto done;
     }
-
+    
     for (int i=0; i < N; i++)
     {
         xy_c = (PyArrayObject*)PyArray_SimpleNew(1, ((npy_intp[]){2}), NPY_FLOAT64);
@@ -264,7 +266,7 @@ static PyObject* apriltag_detect(apriltag_py_t* self,
         }
 
         PyTuple_SET_ITEM(detections_tuple, i,
-                         Py_BuildValue("{s:i,s:f,s:i,s:O,s:O}",
+                         Py_BuildValue("{s:i,s:f,s:i,s:N,s:N}",
                                        "hamming", det->hamming,
                                        "margin",  det->decision_margin,
                                        "id",      det->id,
@@ -278,7 +280,7 @@ static PyObject* apriltag_detect(apriltag_py_t* self,
     result = detections_tuple;
     detections_tuple = NULL;
 
- done:
+  done:
     Py_XDECREF(xy_c);
     Py_XDECREF(xy_lb_rb_rt_lt);
     Py_XDECREF(image);
