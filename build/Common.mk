@@ -27,14 +27,12 @@ SRCS = ../common/g2d.c \
 # Intermediate/output files
 #
 
-OBJS = $(SRCS:.c=.o)
+OBJS = $(addprefix ./$(ARCH)/, $(notdir $(SRCS:.c=.o)))
 
-ifeq ($(OUTPUT_TYPE), so)
-  OUTPUT = lib$(TARGET).so
-else ifeq ($(OUTPUT_TYPE), a)
-  OUTPUT = lib$(TARGET).a
+ifeq ($(OUTPUT_TYPE), dll)
+  OUTPUT = ./$(ARCH)/$(TARGET).$(OUTPUT_TYPE)
 else
-  OUTPUT = $(TARGET).$(OUTPUT_TYPE)
+  OUTPUT = ./$(ARCH)/lib$(TARGET).$(OUTPUT_TYPE)
 endif
 
 #
@@ -80,15 +78,18 @@ all: $(OUTPUT)
 clean:
 	rm -f $(OUTPUT) $(OBJS)
 
-$(TARGET).dll: $(OBJS)
+./$(ARCH)/$(TARGET).dll: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(PTHREAD)
 	$(STRIP) $@
 
-lib$(TARGET).so: $(OBJS)
+./$(ARCH)/lib$(TARGET).so: $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(PTHREAD)
 
-lib$(TARGET).a : $(OBJS)
+./$(ARCH)/lib$(TARGET).a : $(OBJS)
 	$(AR) -crv $@ $^
 
-.c.o:
+./$(ARCH)/%.o: ../common/%.c
+	$(CC) $(CCFLAGS) -c -o $@ $<
+
+./$(ARCH)/%.o: ../%.c
 	$(CC) $(CCFLAGS) -c -o $@ $<
