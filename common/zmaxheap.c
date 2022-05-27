@@ -33,7 +33,6 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include <stdint.h>
 
 #include "zmaxheap.h"
-#include "debug_print.h"
 
 #ifdef _WIN32
 static inline long int random(void)
@@ -177,7 +176,8 @@ void zmaxheap_vmap(zmaxheap_t *heap, void (*f)())
         void *p = NULL;
         memcpy(&p, &heap->data[idx*heap->el_sz], heap->el_sz);
         if (p == NULL) {
-            debug_print("Warning: zmaxheap_vmap item %d is NULL\n", idx);
+            printf("Warning: zmaxheap_vmap item %d is NULL\n", idx);
+            fflush(stdout);
         }
         f(p);
     }

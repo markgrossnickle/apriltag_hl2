@@ -540,15 +540,14 @@ uint32_t zhash_str_hash(const void *_a)
 
     char *a = * (char**)_a;
 
-    uint32_t hash = 0;
+    int32_t hash = 0;
     while (*a != 0) {
-        // optimization of hash x FNV_prime
-        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
-        hash ^= *a;
+        hash = (hash << 7) + (hash >> 23);
+        hash += *a;
         a++;
     }
 
-    return hash;
+    return (uint32_t) hash;
 }
 
 

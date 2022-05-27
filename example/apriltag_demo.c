@@ -31,9 +31,14 @@ either expressed or implied, of the Regents of The University of Michigan.
 */
 
 #include <stdio.h>
-#include <unistd.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <ctype.h>
 #include <math.h>
-#include <errno.h>
+
+#ifdef __linux__
+    #include <unistd.h>
+#endif
 
 #include "apriltag.h"
 #include "tag36h11.h"
@@ -47,12 +52,17 @@ either expressed or implied, of the Regents of The University of Michigan.
 
 #include "common/getopt.h"
 #include "common/image_u8.h"
+#include "common/image_u8x4.h"
 #include "common/pjpeg.h"
 #include "common/zarray.h"
 
 // Invoke:
 //
 // tagtest [options] input.pnm
+
+#ifdef _WIN32
+#define  hamm_hist_max 10
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -102,16 +112,6 @@ int main(int argc, char *argv[])
 
     apriltag_detector_t *td = apriltag_detector_create();
     apriltag_detector_add_family_bits(td, tf, getopt_get_int(getopt, "hamming"));
-
-    switch(errno){
-        case EINVAL:
-            printf("\"hamming\" parameter is out-of-range.\n");
-            exit(-1);
-        case ENOMEM:
-            printf("Unable to add family to detector due to insufficient memory to allocate the tag-family decoder. Try reducing \"hamming\" from %d or choose an alternative tag family.\n", getopt_get_int(getopt, "hamming"));
-            exit(-1);
-    }
-
     td->quad_decimate = getopt_get_double(getopt, "decimate");
     td->quad_sigma = getopt_get_double(getopt, "blur");
     td->nthreads = getopt_get_int(getopt, "threads");
@@ -122,13 +122,15 @@ int main(int argc, char *argv[])
 
     int maxiters = getopt_get_int(getopt, "iters");
 
+#ifdef __linux__
     const int hamm_hist_max = 10;
+#endif
 
     for (int iter = 0; iter < maxiters; iter++) {
 
         int total_quads = 0;
         int total_hamm_hist[hamm_hist_max];
-        memset(total_hamm_hist, 0, sizeof(total_hamm_hist));
+        memset(total_hamm_hist, 0, sizeof(int)*hamm_hist_max);
         double total_time = 0;
 
         if (maxiters > 1)
@@ -154,7 +156,7 @@ int main(int argc, char *argv[])
                 int err = 0;
                 pjpeg_t *pjpeg = pjpeg_create_from_file(path, 0, &err);
                 if (pjpeg == NULL) {
-                    printf("pjpeg failed to load: %s, error %d\n", path, err);
+                    printf("pjpeg error %d\n", err);
                     continue;
                 }
 
@@ -197,14 +199,7 @@ int main(int argc, char *argv[])
                 continue;
             }
 
-            printf("image: %s %dx%d\n", path, im->width, im->height);
-
             zarray_t *detections = apriltag_detector_detect(td, im);
-
-            if (errno==EAGAIN) {
-                printf("Unable to create the %d threads requested.\n",td->nthreads);
-                exit(-1);
-            }
 
             for (int i = 0; i < zarray_size(detections); i++) {
                 apriltag_detection_t *det;
